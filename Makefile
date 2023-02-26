@@ -1,3 +1,3 @@
-build_swagger:
-	cd swagger-gen
-
+swagger:
+	go run swagger-gen/main.go
+	swagger-codegen generate
