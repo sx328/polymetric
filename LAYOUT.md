@@ -1,16 +1,16 @@
 # Current Layout
 ```
-├── Dockerfile <- Dockerfile for running the application 
-├── LAYOUT.md <- This file shows the layout of the project
-├── LICENSE <- Declares the License of the project
-├── Makefile <- Makefile contains the commands to build the project
-├── README.md <- The top-level README for developers using this project
+├── Dockerfile           <- Dockerfile for running the application
+├── LAYOUT.md            <- This file shows the layout of the project
+├── LICENSE              <- Declares the License of the project
+├── Makefile             <- Makefile contains the commands to build the project
+├── README.md            <- The top-level README for developers using this project
 ├── cmd
 │   └── main
-│       └── main.go <- Standard Go entrypoint
-├── go.mod <- Go module file
-├── go.sum <- Go sum file
-├── nft <- Contains the client nft package from the Swagger JSON schema
+│       └── main.go      <- Standard Go entrypoint
+├── go.mod               <- Go module file
+├── go.sum               <- Go sum file
+├── nft                  <- Contains the client nft package from the Swagger JSON schema
 │   ├── README.md
 │   ├── api
 │   │   └── swagger.yaml
@@ -53,7 +53,8 @@
 │   ├── model_transfers_model.go
 │   ├── model_transfers_results_model.go
 │   └── response.go
-├── nft.json <- Contains the JSON schema for the NFT API
-└── swagger-gen <- Contains the Swagger generator
-    └── main.go <- Downloads JSON schema
+├── nft.json             <- Contains the JSON schema for the NFT API
+└── swagger-gen          <- Contains the Swagger generator
+    └── main.go          <- Downloads JSON schema
+
 ```
