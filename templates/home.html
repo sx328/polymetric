@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polymetric - Home</title>
+    <!-- Include Tailwind CSS -->
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+  </head>
+  <body class="bg-gray-100">
+    <nav class="bg-white shadow">
+      <div class="container mx-auto px-6 py-3">
+        <div class="flex items-center justify-between">
+          <a href="#" class="text-lg font-bold text-gray-900 hover:text-gray-700">Polymetric</a>
+          <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none">Connect Wallet</button>
+        </div>
+      </div>
+    </nav>
+    <div class="container mx-auto px-4 py-16 flex flex-col items-center justify-center">
+      <h1 class="text-4xl font-bold mb-4">Welcome to Polymetric</h1>
+      <p class="text-lg text-gray-700 text-center max-w-lg">Polymetric is a decentralized platform for creating and sharing music with others. Connect your wallet to get started and earn rewards for contributing to the community.</p>
+    </div>
+    <!-- Include WalletConnect library -->
+<script src="https://unpkg.com/@walletconnect/web3-provider@1.6.1/dist/web3-provider.min.js"></script>
+
+<!-- Connect Wallet button -->
+<button id="connect-wallet">Connect Wallet</button>
+
+<!-- JavaScript code -->
+<script>
+// Create a new WalletConnect provider
+const provider = new WalletConnectProvider({
+  infuraId: "88cad62548b64a1b8ac1b6ffd8cf5e97",
+});
+
+// Handle the Connect Wallet button click event
+const connectButton = document.getElementById("connect-wallet");
+connectButton.addEventListener("click", async () => {
+  // Check if the user is already connected to a wallet
+  if (provider.connected) {
+    return;
+  }
+
+  // Prompt the user to connect their wallet
+  try {
+    await provider.enable();
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+// Use the provider to interact with the blockchain
+// ...
+</script>
+  </body>
+</html>

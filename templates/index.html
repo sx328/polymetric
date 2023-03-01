@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POAP QR Code</title>
+    <!-- Include Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-800 text-white">
+    <nav class="bg-gray-900 shadow-md">
+      <div class="mx-auto px-6 py-3">
+        <div class="flex items-center justify-between">
+          <div class="hidden md:flex">
+            <a href="#" class="text-lg font-bold text-gray-100 hover:text-gray-300 mr-4">Home</a>
+            <a href="#" class="text-lg font-bold text-gray-100 hover:text-gray-300 mr-4">About</a>
+            <a href="#" class="text-lg font-bold text-gray-100 hover:text-gray-300 mr-4">Contact</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <div class= "flex flex-col items-center justify-center">
+      <div class="mx-auto p-10">
+        <img id="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?data=https%3A%2F%2Fpoap.xyz%2F&size=500x500&margin=0" alt="POAP QR Code" class="block mx-auto mb-8 p-6 bg-white rounded-lg">
+      </div>
+      <div class="text-center mt-4">
+        <h2 class="text-3xl">Scan this QR code with your POAP mobile app to receive your unique POAP for this event.</h2>
+      </div>
+      <div id="qr-code-container" class="fixed top-0 left-0 h-full w-full bg-black bg-opacity-80 z-10 hidden">
+        </div>
+      </div>

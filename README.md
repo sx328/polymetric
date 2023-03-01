@@ -16,7 +16,14 @@ Polymetric is a one-stop shop for NFT project managers who want to stay on top o
 
 Polymetric's core features include:
 
-- POAP integration for IRL meetups :star:
+<!-- - POAP integration for IRL meetups :star:
+- community vanity link for holders to access the community dashboard (e.g. nft sign in )
+- add community mod/admins to dashboard community view
+- ecosystem analytics
+- merch store
+- NFT marketplace (?)
+- airdrop integration -->
+
 - Community management tools for easy engagement and communication :school:
 - Discord NFT verifier for added security and token-gated communities :lock:
 - Discord analytics to help communities understand user behavior and engagement :bar_chart:
@@ -25,3 +32,15 @@ Polymetric's core features include:
 ## How do I use Polymetric?
 
 Polymetric is currently available as an open-source project, with plans to release a hosted version for enterprise customers. To use Polymetric, simply clone the GitHub repository and follow the instructions to set up your environment. Please note that Polymetric is still in development, so it may not be suitable for production use at this time. We recommend deploying Polymetric on a secure server and using it in a controlled environment until it's ready for production use. :shield:
+
+<!-- 
+Future features:
+
+- community vanity link for holders to access the community dashboard (e.g. nft sign in )
+- add community mod/admins to dashboard community view
+- ecosystem analytics
+- merch store
+- NFT marketplace (?)
+- airdrop integration
+
+ -->
