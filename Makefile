@@ -1,20 +1,29 @@
-SWAGGER_INPUT := nft/nft.json
+SWAGGER_INPUT := nft.json
 SWAGGER_OUTPUT := nft
 SWAGGER_API_PACKAGE := nft
 
-swagger: | nft
-	curl https://docs.api.infura.io/nft/swagger.json -o $(SWAGGER_INPUT)
-	swagger-codegen generate -i $(SWAGGER_INPUT) -l go -o $(SWAGGER_OUTPUT) --api-package $(SWAGGER_API_PACKAGE)
+swagger:
+	mkdir -p $(SWAGGER_OUTPUT)
+	curl https://docs.api.infura.io/nft/swagger.json -o $(SWAGGER_OUTPUT)/$(SWAGGER_INPUT)
+	swagger-codegen generate -i $(SWAGGER_OUTPUT)/$(SWAGGER_INPUT) -l go -o $(SWAGGER_OUTPUT) --api-package $(SWAGGER_API_PACKAGE)
 
-ABI_FILE := abi/Seaport.abi
-ABI_PKG := seaport
-ABI_OUTPUT := seaport/Seaport.go
+ABI_DIR := abi
+ABI_OUTPUT_DIR := contract
 
-abi: | seaport
-	mkdir -p $(dir $(ABI_OUTPUT))
-	abigen --abi $(ABI_FILE) --pkg $(ABI_PKG) --out $(ABI_OUTPUT)
+abi:
+	mkdir -p $(ABI_OUTPUT_DIR)
+	for file in $(wildcard $(ABI_DIR)/*.abi); do \
+		echo "Processing $$file"; \
+		base_file=$$(basename $$file); \
+		output_dir=$(ABI_OUTPUT_DIR)/$${base_file%.*}; \
+		output_file=$$output_dir/$${base_file%.*}.go; \
+		mkdir -p $$output_dir; \
+		echo "Output file: $$output_file"; \
+		abigen --abi "$$file" --pkg $${base_file%.*} --out $$output_file; \
+	done
 
-gen: swagger abi
+
+gen: swagger | abi
 
 REDIS_PORT := 6379
 REDIS_USER := seaport
@@ -27,13 +36,7 @@ run:
 	docker run --rm -it -v $(CURDIR)/cmd/main:/app -w /app --network host -e REDIS_ADDR=127.0.0.1:$(REDIS_PORT) -e REDIS_PASSWORD=$(REDIS_PASSWORD) -e REDIS_USER=$(REDIS_USER) golang:1.16 go run main.go
 	docker stop $(REDIS_CONTAINER_NAME)
 
-seaport:
-	mkdir -p seaport
-
-nft:
-	mkdir -p nft
-
 .PHONY: clean
 
 clean:
-	rm -rf seaport/ nft/
+	rm -rf $(ABI_OUTPUT_DIR) $(SWAGGER_OUTPUT)
