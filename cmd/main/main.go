@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/joho/godotenv"
 	"github.com/sx328/polymetric/watcher"
+	"github.com/sx328/polymetric/webhook"
 )
 
 type EventMessage struct {
@@ -46,6 +48,16 @@ func main() {
 			msg := EventMessage{
 				Type: e.Event,
 				Data: e,
+			}
+
+			fmt.Println(e)
+
+			url := os.Getenv("DISCORD_SALES_WEBHOOK")
+			wb := webhook.InitializeWebhook(url)
+
+			err := wb.SendEventEmbed(e)
+			if err != nil {
+				log.Fatal(err)
 			}
 
 			data, err := json.Marshal(msg)

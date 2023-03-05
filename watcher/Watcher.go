@@ -121,12 +121,12 @@ func Watcher(c *ethclient.Client, contractAddress common.Address, events chan<- 
 	// Initailize a new seaport instance for contract events
 	seaport, err := seaport.NewSeaport(contractAddress, c)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Failed to initialize Seaport contract: %v", err)
 	}
 
 	for latestBlock := range LatestBlockNumber(c, 1*time.Second) {
 		query := ethereum.FilterQuery{
-			FromBlock: new(big.Int).SetUint64(latestBlock - 1000),
+			FromBlock: new(big.Int).SetUint64(latestBlock),
 			ToBlock:   new(big.Int).SetUint64(latestBlock),
 			Addresses: []common.Address{
 				contractAddress,
