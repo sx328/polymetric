@@ -1,42 +1,51 @@
-SWAGGER_INPUT := nft.json
-SWAGGER_OUTPUT := nft
-SWAGGER_API_PACKAGE := nft
+# Build variables
+BINARY_NAME=main
+DOCKER_IMAGE_NAME=nft-app
+DOCKER_CONTAINER_NAME=nft-app
 
-swagger:
-	mkdir -p $(SWAGGER_OUTPUT)
-	curl https://docs.api.infura.io/nft/swagger.json -o $(SWAGGER_OUTPUT)/$(SWAGGER_INPUT)
-	swagger-codegen generate -i $(SWAGGER_OUTPUT)/$(SWAGGER_INPUT) -l go -o $(SWAGGER_OUTPUT) --api-package $(SWAGGER_API_PACKAGE)
+# Directories
+FRONTEND_DIR=frontend
+BACKEND_DIR=backend
 
-ABI_DIR := abi
-ABI_OUTPUT_DIR := contract
+# Frontend variables
+FRONTEND_PORT=3030
 
-abi:
-	mkdir -p $(ABI_OUTPUT_DIR)
-	for file in $(wildcard $(ABI_DIR)/*.abi); do \
-		echo "Processing $$file"; \
-		base_file=$$(basename $$file); \
-		output_dir=$(ABI_OUTPUT_DIR)/$${base_file%.*}; \
-		output_file=$$output_dir/$${base_file%.*}.go; \
-		mkdir -p $$output_dir; \
-		echo "Output file: $$output_file"; \
-		abigen --abi "$$file" --pkg $${base_file%.*} --out $$output_file; \
-	done
+# Build backend binary
+build-backend:
+	cd $(BACKEND_DIR) && \
+	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o $(BINARY_NAME) ./cmd/main/main.go
 
+# Build frontend
+build-frontend:
+	cd $(FRONTEND_DIR) && \
+	npm install && \
+	npm run build
 
-gen: swagger | abi
+# Build Docker image
+build-image:
+	docker build -t $(DOCKER_IMAGE_NAME) .
 
-REDIS_PORT := 6379
-REDIS_USER := seaport
-REDIS_PASSWORD := seaport
-REDIS_CONTAINER_NAME := seaport-redis
+# Run Docker container
+run-container:
+	docker run -p $(FRONTEND_PORT):$(FRONTEND_PORT) -p 8080:8080 --name $(DOCKER_CONTAINER_NAME) $(DOCKER_IMAGE_NAME)
 
-run:
-	docker run --rm -d -p $(REDIS_PORT):$(REDIS_PORT) --name $(REDIS_CONTAINER_NAME) -e REDIS_PASSWORD=$(REDIS_PASSWORD) redis
-	sleep 3
-	docker run --rm -it -v $(CURDIR)/cmd/main:/app -w /app --network host -e REDIS_ADDR=127.0.0.1:$(REDIS_PORT) -e REDIS_PASSWORD=$(REDIS_PASSWORD) -e REDIS_USER=$(REDIS_USER) golang:1.16 go run main.go
-	docker stop $(REDIS_CONTAINER_NAME)
+# Stop and remove Docker container
+stop-container:
+	docker stop $(DOCKER_CONTAINER_NAME) && docker rm $(DOCKER_CONTAINER_NAME)
 
-.PHONY: clean
-
+# Clean build artifacts
 clean:
-	rm -rf $(ABI_OUTPUT_DIR) $(SWAGGER_OUTPUT)
+	cd $(BACKEND_DIR) && rm $(BINARY_NAME)
+	cd $(FRONTEND_DIR) && rm -rf build
+
+# Build backend, frontend, and Docker image
+build: build-backend build-frontend build-image
+
+# Build and run Docker container
+run: build run-container
+
+# Stop Docker container
+stop: stop-container
+
+# Rebuild and run Docker container
+rebuild: stop build run-container
