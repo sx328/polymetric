@@ -33,6 +33,11 @@ Polymetric's core features include:
 
 Polymetric is currently available as an open-source project, with plans to release a hosted version for enterprise customers. To use Polymetric, simply clone the GitHub repository and follow the instructions to set up your environment. Please note that Polymetric is still in development, so it may not be suitable for production use at this time. We recommend deploying Polymetric on a secure server and using it in a controlled environment until it's ready for production use. :shield:
 
+# tasks
+- watcher integrated erc-20 token
+- lookup maybe chainlink as well
+- ~~watcher integrated erc-721 token lookup~~
+
 <!-- 
 Future features:
 
@@ -42,5 +47,8 @@ Future features:
 - merch store
 - NFT marketplace (?)
 - airdrop integration
+-->
 
- -->
+
+
+

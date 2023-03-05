@@ -36,11 +36,11 @@ function App() {
       try {
         const web3auth = new Web3Auth({
           clientId, 
-          web3AuthNetwork: "testnet", // mainnet, aqua, celeste, cyan or testnet
+          web3AuthNetwork: "mainnet", // mainnet, aqua, celeste, cyan or testnet
           chainConfig: {
             chainNamespace: CHAIN_NAMESPACES.EIP155,
             chainId: "0x13881",
-            rpcTarget: "https://rpc-mumbai.maticvigil.com", // This is the public RPC we have added, please pass on your own endpoint while creating an app
+            rpcTarget: "https://polygon-mainnet.infura.io/v3/88cad62548b64a1b8ac1b6ffd8cf5e97", // This is the public RPC we have added, please pass on your own endpoint while creating an app
           },
         });
 
@@ -129,48 +129,41 @@ function App() {
 
 
   const connect = () => {
-    var ws = new WebSocket("ws://localhost:8080");
-    setWebSocket(ws);
-
-    // websocket onopen event listener
+    const ws = new WebSocket('ws://localhost:8080/ws');
+  
+    // WebSocket onopen event listener
     ws.onopen = () => {
-      console.log("connected websocket main component");
-      setWebSocket(ws);
-        setInterval(
-          sendSale, 1000 * 60 * 5
-        );
+      console.log('WebSocket connected');
+  
+      setInterval(() => {
+        sendSale();
+      }, 300000); // Send sale every 5 minutes
     };
-
-    ws.onmessage = (message) => {
-      const event = JSON.parse(message.data).payload;
-      console.log(event);
-      setSaleEvents(prevItems =>
-        [
-          event,
-          ...prevItems
-        ]
-      );
+  
+    // WebSocket onmessage event listener
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      console.log('WebSocket message received:', message);
+      if (message.type === 'sale') {
+        setSaleEvents((prevItems) => [message.payload, ...prevItems]);
+      } else if (message.type === 'transfer') {
+        setTransferEvents((prevItems) => [message.payload, ...prevItems]);
+      }
     };
-
-    // websocket onclose event listener
-    ws.onclose = e => {
-      console.log(
-        `Socket is closed!`,
-        e.reason
-      );
+  
+    // WebSocket onclose event listener
+    ws.onclose = (event) => {
+      console.log('WebSocket disconnected:', event);
+      setTimeout(() => connect(), 3000); // Reconnect after 3 seconds
     };
-
-    // websocket onerror event listener
-    ws.onerror = err => {
-      console.error(
-        "Socket encountered error: ",
-        err.message,
-        "Closing socket"
-      );
-
+  
+    // WebSocket onerror event listener
+    ws.onerror = (event) => {
+      console.error('WebSocket encountered an error:', event);
       ws.close();
     };
   };
+  
 
   function addItem() {
     var s = JSON.parse(JSON.stringify(saleEvents[0]));
@@ -214,7 +207,7 @@ function App() {
               walletBalance={walletBalance}
               logout={logout}
             />
-            <Container fluid className="px-0" onClick={addItem}>
+            <Container fluid className="px-0">
               {
                 status.length > 0 && <Alert variant='secondary' className="mb-0">
                   <i className="fa fa-info mx-2"></i> {status}

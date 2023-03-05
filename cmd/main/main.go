@@ -1,47 +1,66 @@
 package main
 
 import (
-	"context"
+	"encoding/json"
 	"log"
+	"net/http"
 	"os"
 
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/gorilla/websocket"
 	"github.com/joho/godotenv"
-	nft "github.com/sx328/poly/nft"
+	"github.com/sx328/polymetric/watcher"
 )
 
-var INFURA_API_KEY string
-var INFURA_API_KEY_SECRET string
-
-const CHAIN_ID string = "137"
-
-// Stream setup; websocket w/ infura for block to block updates, ping infura nft api to get transfers
-
-func loadenv() {
-	// Import INFURA_API_KEY and INFURA_API_KEY_SECRET from .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	INFURA_API_KEY = os.Getenv("INFURA_API_KEY")
-	INFURA_API_KEY_SECRET = os.Getenv("INFURA_API_KEY_SECRET")
+type EventMessage struct {
+	Type string      `json:"type"`
+	Data interface{} `json:"data"`
 }
 
 func main() {
-	// Load environment variables
-	loadenv()
+	godotenv.Load()
 
-	// Create a new api client using vars
-	client := nft.NewAPIClient(nft.NewConfiguration())
-	ctx := context.WithValue(context.Background(), nft.ContextBasicAuth, nft.BasicAuth{
-		UserName: INFURA_API_KEY,
-		Password: INFURA_API_KEY_SECRET,
-	})
+	INFURA_API_KEY := os.Getenv("INFURA_API_KEY")
+	INFURA_API_KEY_SECRET := os.Getenv("INFURA_API_KEY_SECRET")
 
-	cl, resp, err := client.TransfersApi.NftsControllerGetTransfersByTokenAddress(ctx, CHAIN_ID, "0xace8187b113a38f83bd9c896c6878b175c234dcc", nil)
+	c, err := ethclient.Dial("https://polygon-mainnet.infura.io/v3/" + INFURA_API_KEY)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(resp.Body)
-	log.Println(cl)
+
+	ev := make(chan watcher.WatcherEvent)
+
+	go watcher.Watcher(c, common.HexToAddress("0x00000000006c3852cbEf3e08E8dF289169EdE581"), ev, INFURA_API_KEY, INFURA_API_KEY_SECRET)
+
+	upgrader := websocket.Upgrader{}
+
+	http.HandleFunc("/events", func(w http.ResponseWriter, r *http.Request) {
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		for e := range ev {
+			msg := EventMessage{
+				Type: e.Event,
+				Data: e,
+			}
+
+			data, err := json.Marshal(msg)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+
+			err = conn.WriteMessage(websocket.TextMessage, data)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+		}
+	})
+
+	http.ListenAndServe("127.0.0.1:3030", nil)
 }
