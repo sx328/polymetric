@@ -26,9 +26,9 @@ function App() {
 
   const [status, setStatus] = useState("");
   const [webSocket, setWebSocket] = useState(null);
-  const [saleEvents, setSaleEvents] = useState(sampleSales());
+  const [saleEvents, setSaleEvents] = useState([]);
   const [transferEvents, setTransferEvents] = useState(sampleSales());
-  const [contractsList, setContractsList] = useState(['0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0']);
+  const [contractsList, setContractsList] = useState([]);
 
   const [web3auth, setWeb3auth] = useState(null);
   const [provider, setProvider] = useState(null);
@@ -88,23 +88,19 @@ function App() {
   };
 
   const connect = () => {
-    const ws = new WebSocket('ws://localhost:8080/ws');
+    const ws = new WebSocket('ws://localhost:3030/events');
   
     // WebSocket onopen event listener
     ws.onopen = () => {
       console.log('WebSocket connected');
-  
-      setInterval(() => {
-        sendSale();
-      }, 300000); // Send sale every 5 minutes
     };
   
     // WebSocket onmessage event listener
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
       console.log('WebSocket message received:', message);
-      if (message.type === 'sale') {
-        setSaleEvents((prevItems) => [message.payload, ...prevItems]);
+      if (message.type === '0x9d9af8e38d66c62e2c12f0225249fd9d721c54b83f48d9352c97c6cacdcb6f31') {
+        setSaleEvents((prevItems) => [message.data, ...prevItems]);
       } else if (message.type === 'transfer') {
         setTransferEvents((prevItems) => [message.payload, ...prevItems]);
       }
