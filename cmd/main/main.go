@@ -35,7 +35,11 @@ func main() {
 
 	go watcher.Watcher(c, common.HexToAddress("0x00000000006c3852cbEf3e08E8dF289169EdE581"), ev, INFURA_API_KEY, INFURA_API_KEY_SECRET)
 
-	upgrader := websocket.Upgrader{}
+	upgrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
 
 	http.HandleFunc("/events", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
@@ -74,5 +78,5 @@ func main() {
 		}
 	})
 
-	http.ListenAndServe("0.0.0.0:3030", nil)
+	http.ListenAndServe(":3030", nil)
 }

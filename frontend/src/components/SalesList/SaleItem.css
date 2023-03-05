@@ -19,8 +19,9 @@
     margin-right: 1rem!important;
 }
 
-.blog-comments__avatar img {
+.blog-comments__avatar a img {
     width: 5.125rem;
     height: 4.125rem;
     border-radius: 0.25rem;
 }
+
