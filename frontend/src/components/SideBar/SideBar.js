@@ -1,7 +1,7 @@
-import { Col, Navbar, NavbarBrand } from "react-bootstrap";
+import { Col, Navbar, NavbarBrand, Table } from "react-bootstrap";
 import SidebarSearch from "./SidebarSearch";
 
-export default function SideBar() {
+export default function SideBar({contractsList, addContract, removeContract}) {
   return (
     <Col
       className="main-sidebar px-0 col-12 open"
@@ -29,7 +29,25 @@ export default function SideBar() {
           </NavbarBrand>
         </Navbar>
       </div>
-      <SidebarSearch/>
+      <div style={{padding: '10px'}}>
+      <Table striped bordered hover>
+      <thead>
+        <tr>
+          <th>Tracked Contracts</th>
+        </tr>
+      </thead>
+      <tbody>
+          {contractsList.map((contract, idx) => 
+            <tr key={idx}><td>
+              {String(contract).substring(0, 6) +
+              "..." +
+              String(contract).substring(38)}
+            </td></tr>
+          )}
+          </tbody>
+        </Table>
+      </div>
+      <SidebarSearch addContract={addContract}/>
     </Col>
   );
 }

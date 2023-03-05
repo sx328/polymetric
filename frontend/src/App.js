@@ -1,12 +1,5 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './shards-dashboards.1.1.0.css';
-import './App.css';
-
 import React, { useState, useEffect } from 'react';
-
-import { Web3Auth } from "@web3auth/modal";
-import { CHAIN_NAMESPACES } from "@web3auth/base";
-import {getAccounts, getBalance} from "./utils/ethersRPC";
+import { Web3AuthProviderContext } from './contexts/AppContext'
 
 import Header from './components/header/Header';
 import { Col, Container, Row, Alert } from 'react-bootstrap';
@@ -16,17 +9,26 @@ import MainFooter from './components/footer/MainFooter';
 import sampleSales from './data/sampleSales';
 import SalesList from './components/SalesList/SalesList';
 import UsersOverview from './components/discord/UsersOverview';
+import PageTitle from './components/common/PageTitle';
+import SmallStats from './components/SmallStats/SmallStats';
+
+import { Web3Auth } from "@web3auth/modal";
+import { CHAIN_NAMESPACES } from "@web3auth/base";
+
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './shards-dashboards.1.1.0.css';
+import './App.css';
+
 
 const clientId = "BCKjK2QJDaX04efHmlp52zT-4d6R1egLrTYy2tCWFsatCVOPvjGV7JJqCIJxwFxf4q__EdyGJvMYuP93jM6Bm8w"; 
 
 function App() {
 
-  const [walletAddress, setWallet] = useState("");
-  const [walletBalance, setWalletBalance] = useState(0);
   const [status, setStatus] = useState("");
   const [webSocket, setWebSocket] = useState(null);
   const [saleEvents, setSaleEvents] = useState(sampleSales());
   const [transferEvents, setTransferEvents] = useState(sampleSales());
+  const [contractsList, setContractsList] = useState(['0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0']);
 
   const [web3auth, setWeb3auth] = useState(null);
   const [provider, setProvider] = useState(null);
@@ -48,15 +50,14 @@ function App() {
 
         await web3auth.initModal();
 
-        setStatus('🦊 Connect to Metamask using the top right button.');
-
         if (web3auth.provider) {
             setProvider(web3auth.provider);
-            await getUserAccounts();
-            await getUserAccounts();
-            await getUserInfo();
-            await authenticateUser();
-        };
+            console.log('APP - useEffect: Provider found and set');
+        }else {
+          console.log('APP - useEffect: Provider not found');
+        }
+
+        connect();
 
       } catch (error) {
         console.error(error);
@@ -68,65 +69,23 @@ function App() {
 
   const login = async () => {
     if (!web3auth) {
-      setStatus("web3auth not initialized yet");
+      console.log("web3auth not initialized yet");
       return;
     }
     const web3authProvider = await web3auth.connect();
     setProvider(web3authProvider);
-    await getUserAccounts();
-    await getUserAccounts();
-    await getUserInfo();
-    await authenticateUser();
+    console.log('APP - Login: Provider set');
   };
-
-  const authenticateUser = async () => {
-    if (!web3auth) {
-      setStatus("web3auth not initialized yet");
-      return;
-    }
-    const idToken = await web3auth.authenticateUser();
-    console.log(idToken);
-  };
-
-  const getUserInfo = async () => {
-    if (!web3auth) {
-      setStatus("web3auth not initialized yet");
-      return;
-    }
-    const user = await web3auth.getUserInfo();
-    console.log(user);
-  };
-
-  const getUserBalance = async () => {
-    if (!web3auth) {
-      setStatus("web3auth not initialized yet");
-      return;
-    }
-    const balance = await getBalance(provider);
-    setWalletBalance(balance);
-  }
 
   const logout = async () => {
     if (!web3auth) {
-      setStatus("web3auth not initialized yet");
+      console.log("web3auth not initialized yet");
       return;
     }
     await web3auth.logout();
     setProvider(null);
-    setWallet('');
-    setWalletBalance(0);
+    console.log('APP - Logout: Provider set to null');
   };
-
-  const getUserAccounts = async () => {
-    if (!provider) {
-      setStatus("provider not initialized yet");
-      return;
-    }
-    const address = await getAccounts(provider);
-    setStatus('');
-    setWallet(address)
-  };
-
 
   const connect = () => {
     const ws = new WebSocket('ws://localhost:8080/ws');
@@ -189,11 +148,26 @@ function App() {
     }));
   }
 
+  const  addContract = (address) => {
+    if(contractsList.includes(address)) return;
+    setContractsList(prevs => [
+      address,
+      ...prevs
+    ]);
+  }
+
+  const removeContract = (index) => {
+
+  }
+
   return (
-    <>
+    <Web3AuthProviderContext.Provider value={provider}>
       <Container fluid>
         <Row>
-          <SideBar />
+          <SideBar 
+            contractsList={contractsList}
+            addContract={addContract}
+            removeContract={removeContract}/>
           <Col
             className="main-content p-0"
             tag="main"
@@ -203,8 +177,6 @@ function App() {
           >
             <Header
               connectWalletPressed={login}
-              walletAddress={walletAddress}
-              walletBalance={walletBalance}
               logout={logout}
             />
             <Container fluid className="px-0">
@@ -215,7 +187,25 @@ function App() {
               }
             </Container>
             <Container fluid className="main-content-container px-4">
-              <Row className="page-header py-4 no-gutters"></Row>
+
+              <Row noGutters className="page-header py-4">
+              <PageTitle title="NFT Overview" subtitle="Dashboard" className="text-sm-left mb-3" />
+            </Row>
+
+            <Row>
+              <Col className="col-lg mb-4" lg={3} md={3} sm={6}>
+              <SmallStats
+                id={`small-stats-0`}
+                variation="1"
+                label={'MATIC/USDT'}
+                value={1.1045}
+                percentage={'4.70%'}
+                increase={false}
+                decrease={true}
+              />
+              </Col>
+              </Row>
+
               <Row>
                 <Col
                 lg={6}
@@ -242,7 +232,7 @@ function App() {
           </Col>
         </Row>
       </Container>
-    </>
+    </Web3AuthProviderContext.Provider>
   );
 
 
