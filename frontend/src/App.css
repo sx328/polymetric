@@ -16,3 +16,11 @@ body {
 .main-content > .main-content-container.container-fluid {
   min-height: calc(100vh - 10.5rem);
 }
+
+.no-gutters>.col, .no-gutters>[class*=col-] {
+  padding-right: 0;
+  padding-left: 0;
+}
+.text-sm-left {
+  text-align: left!important;
+}
