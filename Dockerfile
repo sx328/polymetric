@@ -1,17 +1,16 @@
-# Use the official Golang image as the base image
-FROM golang:1.16
+FROM golang:1.20
 
-# Set the working directory to /app
-WORKDIR /app
+WORKDIR /usr/src/app
 
-# Copy the source code from the current directory to the container's working directory
+# pre-copy/cache go.mod for pre-downloading dependencies and only redownloading them in subsequent builds if they change
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+
+# copy everything else
 COPY . .
 
-# Build the Go application
-RUN go build -o app ./cmd/main
+EXPOSE 3030
 
-# Expose port 8080 for the application to listen on
-EXPOSE 8080
+RUN go build -v -o /usr/local/bin/app ./cmd/main/main.go
 
-# Run the Go application
-CMD ["./app"]
+CMD ["app"]
